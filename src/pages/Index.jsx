@@ -1,19 +1,79 @@
-// Update this page (the content is just a fallback if you fail and example)
-// Use chakra-ui
-import { Container, Text, VStack } from "@chakra-ui/react";
-
-// Example of using react-icons
-// import { FaRocket } from "react-icons/fa";
-// <IconButton aria-label="Add" icon={<FaRocket />} size="lg" />; // IconButton would also have to be imported from chakra
+import React, { useState } from 'react';
+import { Box, Button, Input, List, ListItem, IconButton, Flex } from '@chakra-ui/react';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 
 const Index = () => {
+  const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState('');
+  const [editingTask, setEditingTask] = useState(null);
+  const [editingText, setEditingText] = useState('');
+
+  const addTask = () => {
+    if (newTask.trim() !== '') {
+      setTasks([...tasks, { id: Date.now(), text: newTask }]);
+      setNewTask('');
+    }
+  };
+
+  const deleteTask = (id) => {
+    setTasks(tasks.filter(task => task.id !== id));
+  };
+
+  const startEditing = (task) => {
+    setEditingTask(task.id);
+    setEditingText(task.text);
+  };
+
+  const saveEditing = (id) => {
+    setTasks(tasks.map(task => (task.id === id ? { ...task, text: editingText } : task)));
+    setEditingTask(null);
+    setEditingText('');
+  };
+
   return (
-    <Container centerContent maxW="container.md" height="100vh" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
-      <VStack spacing={4}>
-        <Text fontSize="2xl">Your Blank Canvas</Text>
-        <Text>Chat with the agent to start making edits.</Text>
-      </VStack>
-    </Container>
+    <Box p={4}>
+      <Flex mb={4}>
+        <Input
+          value={newTask}
+          onChange={(e) => setNewTask(e.target.value)}
+          placeholder="Add a new task"
+          mr={2}
+        />
+        <Button onClick={addTask} colorScheme="teal">Add Task</Button>
+      </Flex>
+      <List spacing={3}>
+        {tasks.map(task => (
+          <ListItem key={task.id}>
+            {editingTask === task.id ? (
+              <Flex>
+                <Input
+                  value={editingText}
+                  onChange={(e) => setEditingText(e.target.value)}
+                  mr={2}
+                />
+                <Button onClick={() => saveEditing(task.id)} colorScheme="teal" mr={2}>Save</Button>
+                <Button onClick={() => setEditingTask(null)}>Cancel</Button>
+              </Flex>
+            ) : (
+              <Flex justify="space-between" align="center">
+                <Box>{task.text}</Box>
+                <Box>
+                  <IconButton
+                    icon={<FaEdit />}
+                    onClick={() => startEditing(task)}
+                    mr={2}
+                  />
+                  <IconButton
+                    icon={<FaTrash />}
+                    onClick={() => deleteTask(task.id)}
+                  />
+                </Box>
+              </Flex>
+            )}
+          </ListItem>
+        ))}
+      </List>
+    </Box>
   );
 };
 
